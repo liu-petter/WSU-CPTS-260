@@ -57,8 +57,8 @@ print_found:
     syscall
 
     # print index
+    move $a0, $v0                      # move the found index to $a0
     li $v0, 1
-    move $a0, $v0
     syscall
 
 exit:
@@ -81,7 +81,7 @@ binary_search_loop:
     # calculate mid index
     # mid = (left + right) / 2
     add $t4, $t2, $t3
-    sra $t4, $t4, 1                    # shift right 2 to divide
+    sra $t4, $t4, 1                    # shift right 1 to divide by 2
 
     # load mid element
     sll $t5, $t4, 2

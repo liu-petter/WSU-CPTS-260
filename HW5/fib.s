@@ -18,33 +18,56 @@ main:
     syscall
 
     # store input
-    add $a0, $v0, $zero
+    move $a0, $v0
 
     # jump to fib function
     jal fib 
+    move $t0, $v0        # store result of fib in $t0
 
     # print out msg2
     li $v0, 4
     la $a0, msg2
     syscall
 
-    #print the integer
+    # print the integer
     li $v0, 1
-    add $a0, $a0, $zero
+    move $a0, $t0
     syscall
     
-    #print the new line
+    # print the newline
     li $v0, 4
     la $a0, newline
     syscall
 
-    #exit
+    # exit
     li $v0, 10
     syscall
 
 fib: 
-    addi    $sp, $sp, -8    # Allocate space on stack 
-    sw      $ra, 4($sp)     # Save return address
-    sw      $a0, 0($sp)     # Save the value of n
-    
-    
+    slti $t0, $a0, 2          # base case, if n < 2, $t0 = 1, else $t0 = 0
+    bne $t0, $zero, base_case # if n < 2, go to base case
+
+    addi $sp, $sp, -16        # allocate space on stack 
+    sw $ra, 4($sp)            # save return address
+    sw $a0, 0($sp)            # save n
+
+    # recursive case
+    addi $a0, $a0, -1         # n = n - 1
+    jal fib                   # call fib(n - 1)
+    sw $v0, 8($sp)            # save fib(n - 1)
+
+    lw $a0, 0($sp)            # restore original n
+    addi $a0, $a0, -2         # n = n - 2
+    jal fib                   # call fib(n - 2)
+    sw $v0, 12($sp)           # save fib(n - 2)
+
+    lw $ra, 4($sp)            # load return address
+    lw $t0, 8($sp)            # load fib(n - 1)
+    lw $t1, 12($sp)           # load fib(n - 2)
+    addi $sp, $sp, 16         # restore stack
+    add $v0, $t0, $t1         # add fib(n - 1) + fib(n - 2)
+    jr $ra
+
+base_case:
+    move $v0, $a0             # return n if n < 2 (base case result)
+    jr $ra
